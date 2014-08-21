@@ -2,6 +2,7 @@
 /************************************
  * Este fichero recibirá como parámetros POST:
  * 
+ * paquete : corechart, table
  * tipografico : PieChart, BarChart
  * 
  * servidorBD : nombre del servidor de base de datos al que conectarse
