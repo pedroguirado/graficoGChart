@@ -24,9 +24,10 @@ Aquí lo único que puede variar es la lista de packages a incluir. Valores posi
 
 ###2. Una llamada a una función cuando se haya cargado la librería para dibujar el gráfico:
 
-
+```javascript
       	// Set a callback to run when the Google Visualization API is loaded.
       	google.setOnLoadCallback(drawChart);
+```
 
 drawChart será el nombre de la función a llamar
 
