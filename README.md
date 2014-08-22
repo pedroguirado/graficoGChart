@@ -30,13 +30,10 @@ Aquí lo único que puede variar es la lista de packages a incluir. Valores posi
 ###2. Una llamada a una función cuando se haya cargado la librería para dibujar el gráfico:
 
 ```javascript
-<<<<<<< HEAD
 // Set a callback to run when the Google Visualization API is loaded.
 google.setOnLoadCallback(drawChart);
-=======
-      	// Set a callback to run when the Google Visualization API is loaded.
-      	google.setOnLoadCallback(drawChart);
->>>>>>> 73632e30f9d0133c794c222ba4ea19e45d86840e
+// Set a callback to run when the Google Visualization API is loaded.
+google.setOnLoadCallback(drawChart);
 ```
 
 drawChart será el nombre de la función a llamar
@@ -44,7 +41,11 @@ drawChart será el nombre de la función a llamar
 Dentro de esta función habrá que hacer varias cosas:
 
 ####2.1. Crear la tabla de datos
-	var datos = new google.visualization.DataTable();
+
+```javascript
+var datos = new google.visualization.DataTable();
+```
+
 Y luego añadir las columnas y las filas a la tabla.
 	
 ####2.2. Especificar las opciones del grafico
@@ -78,6 +79,6 @@ Para acceder a ella tendrás que incluir el fichero:
 	php/graficoGChart.class.php
 en tu código fuente.
 
-* Funciones de la clase
+### Funciones de la clase
 
 
