@@ -19,8 +19,8 @@ En un script javascript debemos incluir:
 		google.load('visualization', '1.0', {'packages':['corechart']});
 
 Aquí lo único que puede variar es la lista de packages a incluir. Valores posibles:
-- corechart
-- table
+	- corechart
+	- table
 
 2. Una llamada a una función cuando se haya cargado la librería para dibujar el gráfico:
 
@@ -32,15 +32,15 @@ drawChart será el nombre de la función a llamar
 
 Dentro de esta función habrá que hacer varias cosas:
 
-	2.1. Crear la tabla de datos
+2.1. Crear la tabla de datos
 	var datos = new google.visualization.DataTable();
 	Y luego añadir las columnas y las filas a la tabla.
 	
-	2.2. Especificar las opciones del grafico
+2.2. Especificar las opciones del grafico
 	var opciones = {'title':'Título del gráfico',
 					'height': 300}
 					
-	2.3. Crear y dibujar el gráfico
+2.3. Crear y dibujar el gráfico
 	Para ello, dependiendo del tipo de gráfico (PieChart, BarChart...):
 		// Crear Gráfico
 		var grafico = new google.visualization.PieChart(document.getElementById('capaGrafico'));
