@@ -20,13 +20,7 @@ $grafico = new graficoGChart();
       $grafico->cargaLibreriaVisualizacion('corechart');
 	  $grafico->dibujaGrafico('PieChart');      
 	  ?>
-
-       
-
-
-        
-
-      
+     
       
       google.setOnLoadCallback(dibujaGrafico2);
       function dibujaGrafico2() {
