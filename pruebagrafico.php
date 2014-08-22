@@ -1,6 +1,4 @@
-<?php
-include ("php/graficoGChart.class.php");
-?>
+
 <!DOCTYPE html>
 <html lang="es">
   <head>

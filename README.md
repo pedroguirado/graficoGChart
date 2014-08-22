@@ -8,6 +8,8 @@ https://google-developers.appspot.com/chart/
 
 ¿Cómo hacer que una página muestre un Google Chart?
 ---------------------------------------------------
+0. Carbar la librería de AJAX
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 1. Cargar la librería de Visualización (Visualization API)
 
