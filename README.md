@@ -61,3 +61,6 @@ Para acceder a ella tendrás que incluir el fichero:
 	php/graficoGChart.class.php
 en tu código fuente.
 
+- Funciones de la clase
+
+
