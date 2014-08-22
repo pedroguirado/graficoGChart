@@ -1,3 +1,6 @@
+<?php
+include ("php/graficoGChart.class.php");
+?>
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -13,7 +16,7 @@
 
       // Cuando la API de Visualización de Google está cargada llama a la función dibujaGrafico.
       google.setOnLoadCallback(dibujaGrafico);
-
+	  google.setOnLoadCallback(dibujaGrafico2);
       // Llama a la función que crea y rellena la tabla,
       // crea el gráfico de quesitos, la pasa los datos y
       // lo dibuja.
@@ -42,11 +45,38 @@ new google.visualization.PieChart(
 document.getElementById('capaGrafico'));
         grafico.draw(datos, opciones);
         
+
+      }
+      
+      
+      function dibujaGrafico2() {
+
+        // Crea la tabla de datos.
+        var datos = new google.visualization.DataTable();
+        datos.addColumn('string', 'Ingredientes');
+        datos.addColumn('number', 'Trozos');
+        datos.addRows([
+          ['Setas', 3],
+          ['Champiñones', 8],
+          ['Aceitunas', 1],
+          ['Piña', 7],
+          ['Pepperoni', 2]
+        ]);
+
+        // Opciones del gráfico
+        var opciones = {'title':'Pizza que me comí anoche',
+        				'width':500,	// Comprobado que no es necesario poner width y height, mejor al div
+        				'height':400};
+
+        
         var grafico2 = 
 new google.visualization.BarChart(
 document.getElementById('capaGrafico2'));
         grafico2.draw(datos, opciones);
       }
+
+      
+      
     </script>
   </head>
     <body>
