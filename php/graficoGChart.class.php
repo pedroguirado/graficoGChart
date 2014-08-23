@@ -57,10 +57,12 @@
 	 * @param $columnas
 	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
 	 * 
+	 * @param $opciones : Es un array que contendrá las distintas opciones
+	 *  		- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
 	 * 
 	 * */
 	 
-	function dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
+	function dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones){
 		$this->num++;
 		$ngrafico = $this->num;
 		// Cuando la API de Visualización de Google está cargada llama a la función dibujaGrafico.
@@ -78,7 +80,7 @@
 		$this->creaTablaDatos($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
 		
 		 // Opciones del gráfico
-		$this->creaOpcionesGrafico(); 
+		$this->creaOpcionesGrafico($opciones); 
 		
 		// Crea y dibuja el gráfico, pasando algunas opciones.
 		
@@ -121,7 +123,7 @@
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
 	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
-	//echo $consulta;
+	
 	if ($resultado = $mysqli->query($consulta)) {
 		echo "\n	datos.addRows([";	
 		$nfilastabla=$mysqli->field_count;
@@ -158,12 +160,14 @@
 	 *         var opciones = {'title':'Pizza que me comí anoche',
         					   'width':400,	
         					   'height':300};
-	 * 
+	 * @param $opciones : Es un array que contendrá las distintas opciones
+	 *  		- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
 	 */
-	private function creaOpcionesGrafico(){
-		echo "    var opciones = {'title':'Pizza que me comí anoche',
-        		'width':400,	
-        		'height':300};";
+	private function creaOpcionesGrafico($opciones){
+		echo "    var opciones = {'title':'".$opciones['title']."'";
+        echo ",\n		'width':400";	
+        echo ",\n		'height':300";
+		echo "\n		};";
 	}
 	
 	

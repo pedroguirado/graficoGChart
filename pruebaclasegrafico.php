@@ -21,8 +21,6 @@ $grafico = new graficoGChart();
       $servidorBD= 'localhost';
 	  $usuarioBD='pruebas';
 	  $passwBD='probando';
-//	  $usuarioBD='root';
-//	  $passwBD='gu1rado';
 	  $bd='mispruebas';
 	  
 	  $columnas=[
@@ -32,13 +30,11 @@ $grafico = new graficoGChart();
 	  "tipo" => "number"]
 	  ];
 	  
-	  $consulta="SELECT sum(`piña`) as `Piña`, sum(atun) as `Atún`, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(`champiñones`) as `Champiñones` from `pizzas`;";
 	  $consulta="SELECT sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas;";
-	  //$consulta="SELECT sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla from `pizzas`;";
-	  //$consulta="select count(id) from pizzas;";
-      
+
+	  $opciones['title'] = "Pizza que me comí anoche";
       $grafico->cargaLibreriaVisualizacion('corechart');
-	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
+	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
 	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);      
 	  ?>  
       

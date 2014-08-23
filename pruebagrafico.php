@@ -43,6 +43,8 @@ new google.visualization.PieChart(
 document.getElementById('capaGrafico'));
         grafico.draw(datos, opciones);
         
+        
+        document.getElementById('png').outerHTML = '<a href="' + grafico.getImageURI() + '">Printable version</a>';
 
       }
       
@@ -79,8 +81,11 @@ document.getElementById('capaGrafico2'));
   </head>
     <body>
     	<!-- DIV que contiene el gráfico -->
-    <div style="width:500px; height:300px" id="capaGrafico"></div>
-    ddd
-	<div style="width:500px; height:300px; background-color: grey" id="capaGrafico2"></div>
+    <div id="capaGrafico"></div>
+	<div style="background-color: grey" id="capaGrafico2"></div>
+	<div style="clear:both">k</div>
+	<p>hola caracola</p>
+	
+	<div id='png'></div>
     </body>    
 </html>
