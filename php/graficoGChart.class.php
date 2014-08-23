@@ -48,9 +48,19 @@
 	 * Para poder tener varios gráficos en la página utilizo la variable $num.
 	 * Esta función dibujará el gráfico en un DIV. Es necesario que en el body de la página tengamos un DIV con ID='capagrafico1' (1 y consecutivos)
 	 * 
+	 * @param tipografico:
+	 * 		PieChart, BarChart,
+	 * 
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * @param $columnas
+	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
+	 * 
+	 * 
 	 * */
 	 
-	function dibujaGrafico($tipografico){
+	function dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
 		$this->num++;
 		$ngrafico = $this->num;
 		// Cuando la API de Visualización de Google está cargada llama a la función dibujaGrafico.
@@ -65,7 +75,7 @@
 		echo "\n";
 		
 		// Crea la tabla de datos.
-		$this->creaTablaDatos();
+		$this->creaTablaDatos($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
 		
 		 // Opciones del gráfico
 		$this->creaOpcionesGrafico(); 
@@ -92,21 +102,53 @@
           		['Zucchini', 1],
           		['Pepperoni', 2]
         	]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
 	 * 
+	 * @param $columnas
+	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
 	 */
-	private function creaTablaDatos(){
+	private function creaTablaDatos($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
 	
 	echo"        var datos = new google.visualization.DataTable();
-        datos.addColumn('string', 'Ingredientes');
-        datos.addColumn('number', 'Trozos');
-        datos.addRows([
-          ['Setas', 3],
-          ['Champiñones', 8],
-          ['Aceitunas', 1],
-          ['Zucchini', 1],
-          ['Pepperoni', 2]
-        ]);	
-		";
+        datos.addColumn('".$columnas[0]["tipo"]."', '".$columnas[0]["nombre"]."');
+        datos.addColumn('".$columnas[1]["tipo"]."', '".$columnas[1]["nombre"]."');\n ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	//echo $consulta;
+	if ($resultado = $mysqli->query($consulta)) {
+		echo "\n	datos.addRows([";	
+		$nfilastabla=$mysqli->field_count;
+		$i=1;
+		$fila = $resultado->fetch_assoc();
+		
+		while ($finfo = $resultado->fetch_field()) {
+			$nombrecampo=$finfo->name;
+
+			echo "['".$nombrecampo."', ".$fila[$nombrecampo]."]";
+			$i++;
+			if ($i<=$nfilastabla){
+				echo ",";
+			}
+			echo "\n";
+    	}
+			
+        echo"\n 	]);	
+		";   	
+
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+
+
 	}
 	
 	/*******************************************************************************

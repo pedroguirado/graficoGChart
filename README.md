@@ -81,6 +81,11 @@ en tu código fuente.
 
 ### Funciones de la clase
 
+* cargaAPIAjax()
+
+* cargaLibreriaVisualizacion($listapaquetes)
+
+* dibujaGrafico($tipografico)
 
 Base de datos de prueba
 -----------------------
