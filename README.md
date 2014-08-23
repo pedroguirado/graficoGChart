@@ -82,3 +82,7 @@ en tu código fuente.
 ### Funciones de la clase
 
 
+Base de datos de prueba
+-----------------------
+
+He generado una base de datos de prueba. En: bd/sentencias.sql está.
