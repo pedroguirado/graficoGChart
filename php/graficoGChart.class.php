@@ -59,7 +59,7 @@
 	 * 
 	 * @param $opciones : Es un array que contendrá las distintas opciones
 	 *  		- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
-	 * 
+	 * 			- $opciones['is3D']: Si el gráfico es en 3D o no
 	 * */
 	 
 	function dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones){
@@ -77,7 +77,16 @@
 		echo "\n";
 		
 		// Crea la tabla de datos.
-		$this->creaTablaDatos($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
+		switch ($tipografico){
+			
+			case 'PieChart': 
+				$this->creaTablaDatosPieChart($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
+				break;
+			case 'BarChart':
+				$this->creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;				
+		}
+		
 		
 		 // Opciones del gráfico
 		$this->creaOpcionesGrafico($opciones); 
@@ -89,9 +98,8 @@
 		echo "\n}\n";
 	}
 	
-	/*********************************************************************************
-	 * 
-	 * Esta función crea la tabla de datos para el gráfico.	 * 
+	/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo PieChart.	  
 	 * El resultado del echo debe ser parecido al siguiente:
 	 * 
 	 *      var datos = new google.visualization.DataTable();
@@ -111,7 +119,7 @@
 	 * @param $columnas
 	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
 	 */
-	private function creaTablaDatos($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
+	private function creaTablaDatosPieChart($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
 	
 	echo"        var datos = new google.visualization.DataTable();
         datos.addColumn('".$columnas[0]["tipo"]."', '".$columnas[0]["nombre"]."');
@@ -149,7 +157,72 @@
     	$mysqli->close();
 	}
 	
+	}
 
+	/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo BarChart.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+var data = google.visualization.arrayToDataTable([
+    ['Year', 'Sales', 'Expenses'],
+    ['2004',  1000,      400],
+    ['2005',  1170,      460],
+    ['2006',  660,       1120],
+    ['2007',  1030,      540]
+]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * @param $columnas
+	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
+	 * 
+	 * @param $consulta
+	 * 		En la primera columna tendremos el nombre de las distintas series. En las siguientes siempre tendrán que ser numéricas
+	 */
+	private function creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
+	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
+
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		// La primera fila la rellenamos con los nombres de los campos	
+		$nfilastabla=$mysqli->field_count;
+		$i=0;
+		echo "[";		
+		while ($finfo = $resultado->fetch_field()) {
+			$nombrecampo=$finfo->name;
+			echo "'".$nombrecampo."'";
+			$i++;
+			if ($i<$nfilastabla)
+				echo ",";
+		}
+		echo "],\n";
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo "['".$fila[0]."'";
+			$i=1;
+			while ($i<$nfilastabla){				
+				echo ", ".$fila[$i];
+				$i++;
+			}
+			
+			echo "],\n";
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "]);";
 
 	}
 	
@@ -157,17 +230,79 @@
 	 * Esta función crea las opciones del gráfico.
 	 * El resultado del echo debe ser parecido al siguiente:
 	 * 
-	 *         var opciones = {'title':'Pizza que me comí anoche',
-        					   'width':400,	
-        					   'height':300};
+	 *         var opciones = {title: 'Pizza que me comí anoche',
+        					   width: 400,	
+        					   height: 300};
 	 * @param $opciones : Es un array que contendrá las distintas opciones
-	 *  		- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
+	 * 
+	 * Comunes: 
+	 * 			- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
+	 * 			- $opciones['width']: Anchura
+	 * 			- $opciones['height']: Altura
+	 * 			- $opciones['colors']: ['#aaaaaa', '#fffaff'] Para especificar los colores de las series
+	 * 
+	 * Para un PieChart:  		
+	 * 			- $opciones['is3D']: Si el gráfico es en 3D o no
+	 * 			- $opciones['pieHole']: Entre 0 y 1, recomendable entre 0.4 y 0.6
+	 *			- $opciones['pieStartAngle']: Dónde comienza el primer slice (Esto no es de interés)
+	 * 
+	 * Para un BarChart:
+	 * 			- $opciones['isStack']: true, para poner barras apiladas 
 	 */
 	private function creaOpcionesGrafico($opciones){
-		echo "    var opciones = {'title':'".$opciones['title']."'";
-        echo ",\n		'width':400";	
-        echo ",\n		'height':300";
-		echo "\n		};";
+		$n = count($opciones);
+
+		$i=0;
+		echo "	var opciones = {";
+		foreach ($opciones as $opcion => $valor){
+			$comilla="";
+			if (is_string($valor)){
+				$comilla="'";
+			}
+			if (is_bool($valor)){				
+				if ($valor==TRUE)
+					$valor="true";
+				else 
+					$valor="false";
+				
+			}
+			if (is_array($valor)){
+				echo "\n			".$opcion.": [";
+				$n2=count($valor);
+				$j=0;
+				foreach($valor as $x => $y){
+					$comilla2="";
+					if (is_string($y)){
+						$comilla2="'";
+					}
+					if (is_bool($y)){				
+						if ($y==TRUE)
+							$y="true";
+						else 
+						$valor="false";				
+					}
+					echo $comilla2.$y.$comilla2;
+					$j++;
+					if ($j<$n2)
+						echo ",";	
+			
+				}
+				echo "]";
+			}
+			else{
+				echo "\n			".$opcion.": ".$comilla.$valor.$comilla;
+			}
+			$i++;
+			if ($i<$n)
+				echo ",";	
+
+		}
+		echo "\n	};";    			
+
+
+				
+			
+
 	}
 	
 	

@@ -33,17 +33,26 @@ $grafico = new graficoGChart();
 	  $consulta="SELECT sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas;";
 
 	  $opciones['title'] = "Pizza que me comí anoche";
+	  $opciones['is3D'] = true;
+	  $opciones['height'] = 300;
+	  $opciones['width']=700;
+	  $opciones['pieHole']=0.4;
+	  //$opciones['pieStartAngle']=100;
+	  //$opciones['colors']= ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6'];
       $grafico->cargaLibreriaVisualizacion('corechart');
 	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
-	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);      
+	  
+	  $consulta2="SELECT ciudad, sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas group by ciudad;";
+	  $opciones['isStacked']=true;
+	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);      
 	  ?>  
       
     </script>
   </head>
     <body>
     	<!-- DIV que contiene el gráfico -->
-    <div style="width:500px; height:300px" id="capagrafico1"></div>
+    <div id="capagrafico1"></div>
     ddd
-	<div style="width:500px; height:300px; background-color: grey" id="capagrafico2"></div>
+	<div style="background-color: grey" id="capagrafico2"></div>
     </body>    
 </html>
