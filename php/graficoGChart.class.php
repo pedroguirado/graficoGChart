@@ -84,7 +84,10 @@
 				break;
 			case 'BarChart':
 				$this->creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
-				break;				
+				break;		
+			case 'ColumnChart':
+				$this->creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;		
 		}
 		
 		
@@ -246,8 +249,10 @@ var data = google.visualization.arrayToDataTable([
 	 * 			- $opciones['pieHole']: Entre 0 y 1, recomendable entre 0.4 y 0.6
 	 *			- $opciones['pieStartAngle']: Dónde comienza el primer slice (Esto no es de interés)
 	 * 
-	 * Para un BarChart:
+	 * Para un BarChart y ColumnChart:
 	 * 			- $opciones['isStack']: true, para poner barras apiladas 
+	 * 			- $opciones['hAxis']: array("title" => "Eje X")
+	 * 			- $opciones['vAxis']: array("title" => "Eje Y")
 	 */
 	private function creaOpcionesGrafico($opciones){
 		$n = count($opciones);
@@ -266,28 +271,54 @@ var data = google.visualization.arrayToDataTable([
 					$valor="false";
 				
 			}
-			if (is_array($valor)){
-				echo "\n			".$opcion.": [";
-				$n2=count($valor);
-				$j=0;
-				foreach($valor as $x => $y){
-					$comilla2="";
-					if (is_string($y)){
-						$comilla2="'";
-					}
-					if (is_bool($y)){				
-						if ($y==TRUE)
-							$y="true";
-						else 
-						$valor="false";				
-					}
-					echo $comilla2.$y.$comilla2;
-					$j++;
-					if ($j<$n2)
-						echo ",";	
+			if (is_array($valor)) {
+				if ($opcion=="colors"){
+					echo "\n			".$opcion.": [";
+					$n2=count($valor);
+					$j=0;
+					foreach($valor as $x => $y){
+						$comilla2="";
+						if (is_string($y))
+							$comilla2="'";
+						
+						if (is_bool($y)){				
+							if ($y==TRUE)
+								$y="true";
+							else 
+							$valor="false";				
+						}
+						echo $comilla2.$y.$comilla2;
+						$j++;
+						if ($j<$n2)
+							echo ",";	
 			
+					}
+					echo "]";
 				}
-				echo "]";
+				else{   // Ejemplo--> hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
+					echo "\n			".$opcion.": {";
+	
+					$n2=count($valor);
+					$j=0;
+					foreach($valor as $x => $y){
+						$comilla2="";
+						if (is_string($y))
+							$comilla2="'";
+						
+						if (is_bool($y)){				
+							if ($y==TRUE)
+								$y="true";
+							else 
+							$valor="false";				
+						}
+						echo $x.": ".$comilla2.$y.$comilla2;
+						$j++;
+						if ($j<$n2)
+							echo ",";	
+					}	
+					
+					echo "}";
+				}
 			}
 			else{
 				echo "\n			".$opcion.": ".$comilla.$valor.$comilla;
@@ -298,11 +329,6 @@ var data = google.visualization.arrayToDataTable([
 
 		}
 		echo "\n	};";    			
-
-
-				
-			
-
 	}
 	
 	

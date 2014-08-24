@@ -38,13 +38,16 @@ $grafico = new graficoGChart();
 	  $opciones['width']=700;
 	  $opciones['pieHole']=0.4;
 	  //$opciones['pieStartAngle']=100;
-	  //$opciones['colors']= ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6'];
+	  $opciones['colors']= ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6'];
       $grafico->cargaLibreriaVisualizacion('corechart');
 	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
 	  
 	  $consulta2="SELECT ciudad, sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas group by ciudad;";
 	  $opciones['isStacked']=true;
-	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);      
+	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones); 
+	  $opciones['isStacked']=false;  
+	  $opciones['vAxis']=array("title" => "Year");
+	  $grafico->dibujaGrafico('ColumnChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);    
 	  ?>  
       
     </script>
@@ -54,5 +57,6 @@ $grafico = new graficoGChart();
     <div id="capagrafico1"></div>
     ddd
 	<div style="background-color: grey" id="capagrafico2"></div>
+	<div id="capagrafico3"></div>
     </body>    
 </html>
