@@ -82,12 +82,15 @@
 			case 'PieChart': 
 				$this->creaTablaDatosPieChart($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
 				break;
-			case 'BarChart':
+			case 'BarChart': case 'ColumnChart': case 'LineChart': case 'AreaChart':
 				$this->creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
-				break;		
-			case 'ColumnChart':
-				$this->creaTablaDatosBarChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
-				break;		
+				break;
+			case 'ScatterChart':
+				$this->creaTablaDatosScatterChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;	
+			case 'Histogram':
+				$this->creaTablaDatosHistogram($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;	
 		}
 		
 		
@@ -163,7 +166,7 @@
 	}
 
 	/********************************************************************************** 
-	 * Esta función crea la tabla de datos para el gráfico de tipo BarChart.	  
+	 * Esta función crea la tabla de datos para el gráfico de tipo BarChart, ColumnChart, LineChart.	  
 	 * El resultado del echo debe ser parecido al siguiente:
 	 * 
 var data = google.visualization.arrayToDataTable([
@@ -229,6 +232,159 @@ var data = google.visualization.arrayToDataTable([
 
 	}
 	
+		
+    /********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo ScatterChart.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+        var data = google.visualization.arrayToDataTable([
+          ['Age', 'Weight'],
+          [ 8,      12],
+          [ 4,      5.5],
+          [ 11,     14],
+          [ 4,      5],
+          [ 3,      3.5],
+          [ 6.5,    7]
+        ]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * 
+	 * @param $consulta
+	 * 		En la primera columna tendremos el nombre de las distintas series. En las siguientes siempre tendrán que ser numéricas
+	 */
+	private function creaTablaDatosScatterChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
+	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
+
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		// La primera fila la rellenamos con los nombres de los campos	
+		$nfilastabla=$mysqli->field_count;
+		$i=0;
+		echo "[";		
+		while ($finfo = $resultado->fetch_field()) {
+			$nombrecampo=$finfo->name;
+			echo "'".$nombrecampo."'";
+			$i++;
+			if ($i<$nfilastabla)
+				echo ",";
+		}
+		echo "]";
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo ",\n		[".$fila[0].", ".$fila[1].",]";
+
+			
+			
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "\n]);";
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo Histogram.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+var data = google.visualization.arrayToDataTable([
+          ['Dinosaur', 'Length'],
+          ['Acrocanthosaurus (top-spined lizard)', 12.2],
+          ['Albertosaurus (Alberta lizard)', 9.1],
+          ['Allosaurus (other lizard)', 12.2],
+          ['Plateosaurus (flat lizard)', 7.9],
+          ['Sauronithoides (narrow-clawed lizard)', 2.0],
+          ['Seismosaurus (tremor lizard)', 45.7],
+          ['Spinosaurus (spiny lizard)', 12.2],
+          ['Supersaurus (super lizard)', 30.5],
+          ['Tyrannosaurus (tyrant lizard)', 15.2],
+          ['Ultrasaurus (ultra lizard)', 30.5],
+          ['Velociraptor (swift robber)', 1.8]]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * 
+	 * @param $consulta
+	 * 		En la primera columna tendremos el nombre de las distintas series. En las siguientes siempre tendrán que ser numéricas
+	 */
+	private function creaTablaDatosHistogram($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
+	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
+
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		// La primera fila la rellenamos con los nombres de los campos	
+		$nfilastabla=$mysqli->field_count;
+		$i=0;
+		echo "[";		
+		while (($finfo = $resultado->fetch_field())&&($i<2)) {
+			$nombrecampo=$finfo->name;
+			echo "'".$nombrecampo."'";
+			$i++;
+			if ($i<$nfilastabla)
+				echo ",";
+		}
+		echo "]";
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo ",\n		['".$fila[0]."', ".$fila[1].",]";
+
+			
+			
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "\n]);";
+
+	}
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/*******************************************************************************
 	 * Esta función crea las opciones del gráfico.
 	 * El resultado del echo debe ser parecido al siguiente:
@@ -243,16 +399,36 @@ var data = google.visualization.arrayToDataTable([
 	 * 			- $opciones['width']: Anchura
 	 * 			- $opciones['height']: Altura
 	 * 			- $opciones['colors']: ['#aaaaaa', '#fffaff'] Para especificar los colores de las series
-	 * 
+	 * 			- $opciones['hAxis']: array("title" => "Eje X")
+	 * 			- $opciones['vAxis']: array("title" => "Eje Y")
+	 * 			- $opciones['legend']: none, bottom, top, left, right
+	 * 			- $opciones['backgroundColor']: color de fondo, en hexadecimal
+	 * 	 
 	 * Para un PieChart:  		
 	 * 			- $opciones['is3D']: Si el gráfico es en 3D o no
 	 * 			- $opciones['pieHole']: Entre 0 y 1, recomendable entre 0.4 y 0.6
 	 *			- $opciones['pieStartAngle']: Dónde comienza el primer slice (Esto no es de interés)
 	 * 
-	 * Para un BarChart y ColumnChart:
+	 * Para un BarChart, ColumnChart y AreaChart:
 	 * 			- $opciones['isStack']: true, para poner barras apiladas 
-	 * 			- $opciones['hAxis']: array("title" => "Eje X")
-	 * 			- $opciones['vAxis']: array("title" => "Eje Y")
+	 * 
+	 * Para un ScatterChart:
+	 * 			- Es recomendable poner hAxis y vAxis, así como poner legend a none
+	 *  
+	 * Para un LineChart: 
+	 * 			- $opciones['curveType']= 'function' para que las líneas sean curvas
+	 * 			- $opciones['lineWidth']: anchura de la línea. Por defecto es 2
+	 * 			- $opciones['orientation']= 'vertical' Para poner el gráfico de líneas de forma vertical
+	 * 			- $opciones['pointShape']:  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'  --> También para ScatterChart y AreaChart
+	 * 			- $opciones['pointShape']: 10, para expresar el tamaño del punto. Por defecto está a 0. --> También para ScatterChart y AreaChart
+	 * 
+	 * Para un Histogram:
+	 * 			- $opciones['histogram']: ['lastBucketPercentile' => 5] Elimina el percentil 5 por arriba y por debajo
+	 * 			- $opciones['histogram']: ['bucketSize' => 1000] Cambia el tamaño del cubo a 1000
+	 * 
+	 * 
+	 * 			- $opciones['']:
+	 * 
 	 */
 	private function creaOpcionesGrafico($opciones){
 		$n = count($opciones);

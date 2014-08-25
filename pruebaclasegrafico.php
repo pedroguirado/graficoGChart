@@ -47,7 +47,31 @@ $grafico = new graficoGChart();
 	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones); 
 	  $opciones['isStacked']=false;  
 	  $opciones['vAxis']=array("title" => "Year");
-	  $grafico->dibujaGrafico('ColumnChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);    
+	  $grafico->dibujaGrafico('ColumnChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);  
+	  
+	  $consulta3="SELECT pepperoni as Pepperoni, aceitunas as Aceitunas from pizzas;";
+	  $opciones2['title']="Comparo Pepperoni y Aceitunas";
+	  $opciones2['height'] = 300;
+	  $opciones2['width']= 500;	  
+	  $opciones2['legend']='none';
+	  $opciones2['vAxis']=['title'=>'Pepperoni'];
+	  $opciones2['hAxis']=['title'=>'Aceitunas'];
+	  $opciones2['pointShape']='triangle';
+	  $grafico->dibujaGrafico('ScatterChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta3, $opciones2); 
+	  
+	  $opciones['curveType']='function';
+	  $opciones['lineWidth']=5;
+	  //$opciones['backgroundColor']='#aa0000';
+	  $opciones['pointSize']=10;
+	  $grafico->dibujaGrafico('LineChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta2, $opciones);
+	  $grafico->dibujaGrafico('AreaChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta2, $opciones);	
+	  $opciones4['title']="Mi primer histograma";
+	  $opciones4['legend']="none";
+	  $opciones4['width']=400;
+	  $opciones4['height']=600;
+	  $opciones4['histogram']= ['bucketSize' => 7]; 
+	  $consulta4="select pizzeria, precio from pizzas;";
+	  $grafico->dibujaGrafico('Histogram',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta4, $opciones4);    
 	  ?>  
       
     </script>
@@ -58,5 +82,9 @@ $grafico = new graficoGChart();
     ddd
 	<div style="background-color: grey" id="capagrafico2"></div>
 	<div id="capagrafico3"></div>
+	<div id="capagrafico4"></div>
+	<div id="capagrafico5"></div>
+	<div id="capagrafico6"></div>
+	<div id="capagrafico7"></div>
     </body>    
 </html>
