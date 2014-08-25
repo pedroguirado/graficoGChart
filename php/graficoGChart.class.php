@@ -91,6 +91,9 @@
 			case 'Histogram':
 				$this->creaTablaDatosHistogram($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
 				break;	
+			case 'CandlestickChart':
+				$this->creaTablaDatosCandlestickChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;				
 		}
 		
 		
@@ -296,19 +299,7 @@ var data = google.visualization.arrayToDataTable([
 
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-/********************************************************************************** 
+	/********************************************************************************** 
 	 * Esta función crea la tabla de datos para el gráfico de tipo Histogram.	  
 	 * El resultado del echo debe ser parecido al siguiente:
 	 * 
@@ -331,7 +322,7 @@ var data = google.visualization.arrayToDataTable([
 	 * 
 	 * 
 	 * @param $consulta
-	 * 		En la primera columna tendremos el nombre de las distintas series. En las siguientes siempre tendrán que ser numéricas
+	 * 		En la primera columna tendremos el nombre del elemento / nombre del valor numérico. Solo 2 columnas
 	 */
 	private function creaTablaDatosHistogram($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
 	
@@ -380,7 +371,58 @@ var data = google.visualization.arrayToDataTable([
 	
 	
 	
+/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo CandlestickChart.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+    var data = google.visualization.arrayToDataTable([
+      ['Mon', 20, 28, 38, 45],
+      ['Tue', 31, 38, 55, 66],
+      ['Wed', 50, 55, 77, 80],
+      ['Thu', 77, 77, 66, 50],
+      ['Fri', 68, 66, 22, 15]
+      // Treat first row as data as well.
+    ], true);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * 
+	 * @param $consulta
+	 * 		Siempre 5 columnas. La primera de tipo string. No es necesaria fila cabecera
+	 */
+	private function creaTablaDatosCandlestickChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
 	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
+
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		// La primera fila la rellenamos con los nombres de los campos	
+
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo "\n		['".$fila[0]."', ".$fila[1].", ".$fila[2].", ".$fila[3].", ".$fila[4]."],";
+
+			
+			
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "\n], true);\n";
+
+	}
+		
 	
 	
 	

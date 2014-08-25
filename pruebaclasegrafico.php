@@ -71,7 +71,10 @@ $grafico = new graficoGChart();
 	  $opciones4['height']=600;
 	  $opciones4['histogram']= ['bucketSize' => 7]; 
 	  $consulta4="select pizzeria, precio from pizzas;";
-	  $grafico->dibujaGrafico('Histogram',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta4, $opciones4);    
+	  $grafico->dibujaGrafico('Histogram',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta4, $opciones4); 
+	  $opciones5['title']="Mi primer candelabro";
+	  $consulta5="SELECT ciudad, min( precio ) , precio, precio +4, max( precio ) FROM pizzas group by ciudad";
+	  $grafico->dibujaGrafico('CandlestickChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta5, $opciones5);
 	  ?>  
       
     </script>
@@ -86,5 +89,6 @@ $grafico = new graficoGChart();
 	<div id="capagrafico5"></div>
 	<div id="capagrafico6"></div>
 	<div id="capagrafico7"></div>
+	<div id="capagrafico8"></div>
     </body>    
 </html>
