@@ -25,10 +25,7 @@
 		 * 
 		 * google.load('visualization', '1.0', {'packages':['corechart']});
 		 * 
-		 * @param listapaquetes
-		 * 		será algo parecido a:
-		 * 				corechart
-		 * 				corechart, table
+		 * @param listapaquetes es un array de string con valores como corechart, table o gauge
 		 * 
 		 * Dependiendo del tipo de gráfico que queramos visualizar, habrá que cargar distintos paquetes
 		 * 
@@ -38,7 +35,16 @@
 		 * 
 		 */
 		 
-		 echo "google.load('visualization', '1.0', {'packages':['".$listapaquetes."']});";
+		 echo "google.load('visualization', '1.0', {'packages':[";
+		 $n=count($listapaquetes);
+		 $i=0;
+		 while ($i<$n){
+		 	 echo "'".$listapaquetes[$i]."'";
+			 $i++;
+			 if ($i<$n)
+			 	echo ', ';
+		 }
+		 echo "]});";
 		 
 	}
 	
@@ -93,7 +99,10 @@
 				break;	
 			case 'CandlestickChart':
 				$this->creaTablaDatosCandlestickChart($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
-				break;				
+				break;
+			case 'Table': 
+				$this->creaTablaDatosTable($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
+				break;								
 		}
 		
 		
@@ -366,12 +375,8 @@ var data = google.visualization.arrayToDataTable([
 
 	}
 		
-	
-	
-	
-	
-	
-/********************************************************************************** 
+		
+	/********************************************************************************** 
 	 * Esta función crea la tabla de datos para el gráfico de tipo CandlestickChart.	  
 	 * El resultado del echo debe ser parecido al siguiente:
 	 * 
@@ -427,6 +432,94 @@ var data = google.visualization.arrayToDataTable([
 	
 	
 	
+	
+	
+	
+	
+	/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo Table.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+     var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Name');
+        data.addColumn('number', 'Salary');
+        data.addColumn('boolean', 'Full Time Employee');
+        data.addRows([
+          ['Mike',  {v: 10000, f: '$10,000'}, true],
+          ['Jim',   {v:8000,   f: '$8,000'},  false],
+          ['Alice', {v: 12500, f: '$12,500'}, true],
+          ['Bob',   {v: 7000,  f: '$7,000'},  true]
+        ]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * @param $columnas
+	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
+	 * 		Tipo: string, number, boolean
+	 */
+	private function creaTablaDatosTable($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
+	
+	echo"        var datos = new google.visualization.DataTable();\n";
+     $n=count($columnas);
+     for($i=0;$i<$n;$i++) {
+    	echo"    datos.addColumn('".$columnas[$i]["tipo"]."', '".$columnas[$i]["nombre"]."');\n ";		
+	}
+
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		echo "\n	datos.addRows([";	
+		while ($fila = $resultado->fetch_array()){
+			echo "[";
+			$i=0;
+			while ($i<$n){
+				switch ($columnas[$i]['tipo']){
+					case 'number':
+						echo $fila[$i];
+						break;
+					case 'boolean':
+						if ($fila[$i])
+							echo 'true';
+						else
+							echo 'false';
+						break;
+					default:
+						echo "'".$fila[$i]."'";
+				}	
+				$i++;
+				if ($i<$n)
+					echo ", ";
+			}
+			echo "],\n";
+		}
+		
+        echo"\n 	]);	
+		";   	
+
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/*******************************************************************************
 	 * Esta función crea las opciones del gráfico.
 	 * El resultado del echo debe ser parecido al siguiente:
@@ -467,6 +560,11 @@ var data = google.visualization.arrayToDataTable([
 	 * Para un Histogram:
 	 * 			- $opciones['histogram']: ['lastBucketPercentile' => 5] Elimina el percentil 5 por arriba y por debajo
 	 * 			- $opciones['histogram']: ['bucketSize' => 1000] Cambia el tamaño del cubo a 1000
+	 * 
+	 * Para un Table:
+	 * 			- $opciones['page']: 'enable' 'disable'(por defecto) 'event' Para activar paginación
+	 * 			- $opciones['pageSize']: número de líneas por página
+	 * 			- $opciones['sort']: 'enable'(por defecto) 'disable' 'event' Para activar ordenación
 	 * 
 	 * 
 	 * 			- $opciones['']:

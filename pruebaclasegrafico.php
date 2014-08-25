@@ -18,6 +18,10 @@ $grafico = new graficoGChart();
       // Carga el API de Visualizacion y el paquete del gráfico de quesitos
       <?php
       
+      
+      $grafico->cargaLibreriaVisualizacion(array('corechart','table'));
+      
+      
       $servidorBD= 'localhost';
 	  $usuarioBD='pruebas';
 	  $passwBD='probando';
@@ -39,7 +43,7 @@ $grafico = new graficoGChart();
 	  $opciones['pieHole']=0.4;
 	  //$opciones['pieStartAngle']=100;
 	  $opciones['colors']= ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6'];
-      $grafico->cargaLibreriaVisualizacion('corechart');
+      
 	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
 	  
 	  $consulta2="SELECT ciudad, sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas group by ciudad;";
@@ -75,6 +79,25 @@ $grafico = new graficoGChart();
 	  $opciones5['title']="Mi primer candelabro";
 	  $consulta5="SELECT ciudad, min( precio ) , precio, precio +4, max( precio ) FROM pizzas group by ciudad";
 	  $grafico->dibujaGrafico('CandlestickChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta5, $opciones5);
+	  
+	  
+	  
+	  $columnas6=[
+	  ["nombre" => "Ciudad",
+	  "tipo" => "string"],
+	  ["nombre" => "Pizzería",
+	  "tipo" => "string"],
+	  ["nombre" => "Precio",
+	  "tipo" => "number"]
+	  ];
+	  
+	  $consulta6="SELECT ciudad, pizzeria, precio from pizzas;";
+
+	  $opciones6['title'] = "Pizza que me comí anoche";
+	  $opciones6['page'] ='enable';
+	  $opciones6['pageSize'] = 5;
+      
+	  $grafico->dibujaGrafico('Table',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas6, $consulta6, $opciones6);
 	  ?>  
       
     </script>
@@ -90,5 +113,6 @@ $grafico = new graficoGChart();
 	<div id="capagrafico6"></div>
 	<div id="capagrafico7"></div>
 	<div id="capagrafico8"></div>
+	<div id="capagrafico9"></div>
     </body>    
 </html>
