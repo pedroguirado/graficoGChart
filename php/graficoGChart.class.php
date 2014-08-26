@@ -105,7 +105,10 @@
 				break;	
 			case 'Gauge':
 				$this->creaTablaDatosGauge($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
-				break;											
+				break;
+			case 'Map':
+				$this->creaTablaDatosMap($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;															
 		}
 		
 		
@@ -496,15 +499,6 @@ var data = google.visualization.arrayToDataTable([
 	}
 	
 	
-
-
-
-
-
-
-
-
-
 	/********************************************************************************** 
 	 * Esta función crea la tabla de datos para el gráfico de tipo Gauge.	  
 	 * El resultado del echo debe ser parecido al siguiente:
@@ -550,7 +544,56 @@ var data = google.visualization.arrayToDataTable([
 	echo "\n]);";
 
 	}	
+
+
+	/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo Map.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+
+
+  var data = google.visualization.arrayToDataTable([
+    ['Lat', 'Long', 'Name'],
+    [37.4232, -122.0853, 'Work'],
+    [37.4289, -122.1697, 'University'],
+    [37.6153, -122.3900, 'Airport'],
+    [37.4422, -122.1731, 'Shopping']
+  ]);
+
+
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * 
+	 * @param $consulta
+	 * 		En la primera columna Latitud (numérico), segunda Longitud (numérico), tercera Nombre (String)
+	 */
+	private function creaTablaDatosMap($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
 	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ['Lat', 'Long', 'Name'] ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo ",\n		[".$fila[0].", ".$fila[1].", '".$fila[2]."']";
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "\n]);";
+
+	}	
 	
 	
 	
@@ -616,6 +659,17 @@ var data = google.visualization.arrayToDataTable([
 	 * 		    - $opciones['majorTicks']:	Número de líneas grandes
 	 * 		    - $opciones['minorTicks']:	Número de líneas pequeñas entre cada línea grande
 	 * 	   	 	- $opciones['animation']: {duration: ms, easing: 'linear' o 'in' o 'out' o 'inAndOut'}
+	 * 
+	 * Para un Map:
+	 * 			- $opciones['enableScrollWheel']: true (false es por defecto) para habilitar la rueda del ratón
+	 * 			- $opciones['showTip']: true para habilitar clic y que aparezca info (false es por defecto)
+	 * 			- $opciones['showLine']: true para que se dibuje una línea uniendo los puntos (false es por defecto) (NO ME FUNCIONA)
+	 * 			- $opciones['lineWidth']: $opciones['lineColor']:
+	 * 			- $opciones['mapType']: ‘normal’, ‘terrain’, ‘satellite’ o ‘hybrid’(por defecto)
+	 * 			- $opciones['useMapTypeControl']: Para poder seleccionar entre los anteriores
+	 *  	 	- $opciones['zoomLevel']: 0 - 19 (se ajusta solo)
+	 * 			- $opciones['icons']=['default'=>['normal'=>'http://direccionicono.png', 'selected'=>http://otradireccionicono.png']]
+	 * 
 	 *  	 	- $opciones['']:
 	 */
 	private function creaOpcionesGrafico($opciones){
@@ -641,6 +695,8 @@ var data = google.visualization.arrayToDataTable([
 					$n2=count($valor);
 					$j=0;
 					foreach($valor as $x => $y){
+
+						//else{
 						$comilla2="";
 						if (is_string($y))
 							$comilla2="'";
@@ -649,10 +705,12 @@ var data = google.visualization.arrayToDataTable([
 							if ($y==TRUE)
 								$y="true";
 							else 
-							$valor="false";				
+								$y="false";				
 						}
 						echo $comilla2.$y.$comilla2;
-						$j++;
+						//}
+						
+						$j++;						
 						if ($j<$n2)
 							echo ",";	
 			
@@ -665,6 +723,38 @@ var data = google.visualization.arrayToDataTable([
 					$n2=count($valor);
 					$j=0;
 					foreach($valor as $x => $y){
+						
+						
+						
+						if (is_array($y)){
+							echo "\n			".$x.": {";
+	
+							$n3=count($y);
+							$k=0;
+							foreach($y as $ynombre => $yvalor){
+								$comilla3="";
+								if (is_string($yvalor))
+									$comilla3="'";
+						
+								if (is_bool($yvalor)){				
+									if ($yvalor==TRUE)
+										$yvalor="true";
+									else 
+										$yvalor="false";				
+								}
+								echo $ynombre.": ".$comilla3.$yvalor.$comilla3;
+								$k++;
+								if ($k<$n3)
+									echo ",";	
+							}	
+					
+							echo "}";
+							
+						}
+						else{
+						
+						
+						
 						$comilla2="";
 						if (is_string($y))
 							$comilla2="'";
@@ -676,6 +766,11 @@ var data = google.visualization.arrayToDataTable([
 							$valor="false";				
 						}
 						echo $x.": ".$comilla2.$y.$comilla2;
+						
+						
+						}
+						
+						
 						$j++;
 						if ($j<$n2)
 							echo ",";	

@@ -19,7 +19,7 @@ $grafico = new graficoGChart();
       <?php
       
       
-      $grafico->cargaLibreriaVisualizacion(array('corechart','table','gauge'));
+      $grafico->cargaLibreriaVisualizacion(array('corechart','table','gauge','map'));
       
       
       $servidorBD= 'localhost';
@@ -105,7 +105,17 @@ $grafico = new graficoGChart();
 	  $opciones7['title']="Mi primer gauge";
 	  $opciones7['redTo']=40;
 	  $consulta7='select pizzeria, precio from pizzas where ciudad="Maracena" ;';
-	  $grafico->dibujaGrafico('Gauge',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta7, $opciones7); 
+	  $grafico->dibujaGrafico('Gauge',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta7, $opciones7);
+	  
+	  $opciones11['title']='Mi primer mapa';
+	  //$opciones11['width']=900;
+	  //$opciones11['height']=800;
+	  //$opciones11['zoomLevel']=10;
+	  $opciones11['showTip']=true; $opciones11['showLine']=true; $opciones11['lineColor']='#cccccc'; $opciones11['lineWidth']=15;
+	  $opciones11['icons']=['default' => ['normal' => 'http://icons.iconarchive.com/icons/icons-land/vista-map-markers/48/Map-Marker-Ball-Azure-icon.png']];
+	  
+	  $consulta11='select x, y, pizzeria from pizzas  where provincia="Granada" group by x, y;';
+	  $grafico->dibujaGrafico('Map',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta11, $opciones11);  
 	  ?>  
       
     </script>
@@ -123,5 +133,6 @@ $grafico = new graficoGChart();
 	<div id="capagrafico8"></div>
 	<div id="capagrafico9"></div>
 	<div id="capagrafico10"></div>
+	<div style="width:500px" id="capagrafico11"></div>
     </body>    
 </html>
