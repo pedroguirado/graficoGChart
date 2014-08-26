@@ -113,7 +113,7 @@
 		
 		
 		 // Opciones del gráfico
-		$this->creaOpcionesGraficoJSON($opciones); 
+		$this->creaOpcionesGrafico($opciones); 
 		
 		// Crea y dibuja el gráfico, pasando algunas opciones.
 		
@@ -790,21 +790,6 @@ var data = google.visualization.arrayToDataTable([
 		echo "\n	};";    			
 	}
 	
-	
-	
-	/*********************************************************************************
-	 * Voy a intentar hacer una función que reciba un array ($opciones) y lo codifique en JSON
-	 * 
-	 * 
-	 * */
-		private function creaOpcionesGraficoJSON($opciones){
-
-		echo "	var opciones = ";
-	
-		echo json_encode ($opciones);
-	
-		echo ";";
-		}
 	
 	/*********************************************************************************
 	 * Esta función crea el gráfico con los datos y opciones anteriores.
