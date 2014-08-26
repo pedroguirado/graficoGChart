@@ -102,7 +102,10 @@
 				break;
 			case 'Table': 
 				$this->creaTablaDatosTable($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta);
-				break;								
+				break;	
+			case 'Gauge':
+				$this->creaTablaDatosGauge($servidorBD,$usuarioBD,$passwBD,$bd, $consulta);
+				break;											
 		}
 		
 		
@@ -148,7 +151,7 @@
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
 	
 	if ($resultado = $mysqli->query($consulta)) {
 		echo "\n	datos.addRows([";	
@@ -207,8 +210,6 @@ var data = google.visualization.arrayToDataTable([
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
-	
 
 	
 	if ($resultado = $mysqli->query($consulta)) {
@@ -275,9 +276,6 @@ var data = google.visualization.arrayToDataTable([
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
-	
-
 	
 	if ($resultado = $mysqli->query($consulta)) {
 		// La primera fila la rellenamos con los nombres de los campos	
@@ -342,8 +340,6 @@ var data = google.visualization.arrayToDataTable([
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
-	
 
 	
 	if ($resultado = $mysqli->query($consulta)) {
@@ -405,9 +401,6 @@ var data = google.visualization.arrayToDataTable([
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
-	
-
 	
 	if ($resultado = $mysqli->query($consulta)) {
 		// La primera fila la rellenamos con los nombres de los campos	
@@ -428,14 +421,7 @@ var data = google.visualization.arrayToDataTable([
 
 	}
 		
-	
-	
-	
-	
-	
-	
-	
-	
+		
 	/********************************************************************************** 
 	 * Esta función crea la tabla de datos para el gráfico de tipo Table.	  
 	 * El resultado del echo debe ser parecido al siguiente:
@@ -471,7 +457,7 @@ var data = google.visualization.arrayToDataTable([
    	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 	}
 	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
-	$consulta = $mysqli->real_escape_string($consulta); // Para evitar Inyección SQL
+	
 	
 	if ($resultado = $mysqli->query($consulta)) {
 		echo "\n	datos.addRows([";	
@@ -510,7 +496,60 @@ var data = google.visualization.arrayToDataTable([
 	}
 	
 	
+
+
+
+
+
+
+
+
+
+	/********************************************************************************** 
+	 * Esta función crea la tabla de datos para el gráfico de tipo Gauge.	  
+	 * El resultado del echo debe ser parecido al siguiente:
+	 * 
+        var data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['Memory', 80],
+          ['CPU', 55],
+          ['Network', 68]
+        ]);
+	 *
+	 * @param $servidorBD, $usuarioBD, $passwBD, $bd
+	 * 		para conectarse a la base de datos de la que extraeremos los datos
+	 * 
+	 * 
+	 * @param $consulta
+	 * 		En la primera columna tendremos el nombre del elemento / nombre del valor numérico. Solo 2 columnas
+	 */
+	private function creaTablaDatosGauge($servidorBD,$usuarioBD,$passwBD,$bd, $consulta){
 	
+	echo"        var datos = new google.visualization.arrayToDataTable([\n ['Label', 'Value'] ";
+    
+	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
+	if ($mysqli->connect_errno) {
+   	 	echo "Fallo al conectar a MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+	}
+	$acentos = $mysqli->query("SET NAMES 'utf8'"); // Para no tener problema con las tildes ni eñes
+	
+	
+	//echo $consulta;
+	
+	if ($resultado = $mysqli->query($consulta)) {
+		
+		while ($fila = $resultado->fetch_array(MYSQLI_NUM)){
+			echo ",\n		['".$fila[0]."', ".$fila[1]."]";
+    	}
+			
+    	/* liberar el conjunto de resultados */
+    	$resultado->free();
+    	$mysqli->close();
+	}
+	
+	echo "\n]);";
+
+	}	
 	
 	
 	
@@ -566,9 +605,18 @@ var data = google.visualization.arrayToDataTable([
 	 * 			- $opciones['pageSize']: número de líneas por página
 	 * 			- $opciones['sort']: 'enable'(por defecto) 'disable' 'event' Para activar ordenación
 	 * 
-	 * 
-	 * 			- $opciones['']:
-	 * 
+	 * Para un Gauge:
+	 * 			- $opciones['greenFrom']:
+	 *  	    - $opciones['greenTo']:
+	 * 	    	- $opciones['yellowFrom']:
+	 * 	    	- $opciones['yellowTo']:
+	 * 		    - $opciones['redFrom']:
+	 * 		    - $opciones['redTo']:		Las anteriores opciones indican en % dónde comienzan y acaban cada uno de los indicadores
+	 * 										del marcador
+	 * 		    - $opciones['majorTicks']:	Número de líneas grandes
+	 * 		    - $opciones['minorTicks']:	Número de líneas pequeñas entre cada línea grande
+	 * 	   	 	- $opciones['animation']: {duration: ms, easing: 'linear' o 'in' o 'out' o 'inAndOut'}
+	 *  	 	- $opciones['']:
 	 */
 	private function creaOpcionesGrafico($opciones){
 		$n = count($opciones);

@@ -19,7 +19,7 @@ $grafico = new graficoGChart();
       <?php
       
       
-      $grafico->cargaLibreriaVisualizacion(array('corechart','table'));
+      $grafico->cargaLibreriaVisualizacion(array('corechart','table','gauge'));
       
       
       $servidorBD= 'localhost';
@@ -96,8 +96,16 @@ $grafico = new graficoGChart();
 	  $opciones6['title'] = "Pizza que me comí anoche";
 	  $opciones6['page'] ='enable';
 	  $opciones6['pageSize'] = 5;
+	  $opciones6['width']=500;
       
 	  $grafico->dibujaGrafico('Table',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas6, $consulta6, $opciones6);
+	  
+	  
+	  
+	  $opciones7['title']="Mi primer gauge";
+	  $opciones7['redTo']=40;
+	  $consulta7='select pizzeria, precio from pizzas where ciudad="Maracena" ;';
+	  $grafico->dibujaGrafico('Gauge',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta7, $opciones7); 
 	  ?>  
       
     </script>
@@ -114,5 +122,6 @@ $grafico = new graficoGChart();
 	<div id="capagrafico7"></div>
 	<div id="capagrafico8"></div>
 	<div id="capagrafico9"></div>
+	<div id="capagrafico10"></div>
     </body>    
 </html>
