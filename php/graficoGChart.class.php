@@ -19,6 +19,24 @@
 		echo "\n";
 	}
 	
+	
+	/****************************************************************************+
+	 * Esta función va a recibir una matriz asociativa que es POST, sabiendo que tengo:
+	 * 
+	 * 
+	 * $POST['numerograficos']= Un número que debe ser mayor que 0
+ 	 * $POST['tipografico1'], $POST['tipografico2'], $POST['tipografico3'], $POST['tipografico4'], Tantos como 'numerograficos'
+	 * 
+	 * generará un array que como mucho contendrá: 
+	 * 			array('corechart','table','gauge','map')
+	 * 
+	 * */
+	function generaListaPaquetes ($p){
+		
+		return array('corechart','table','gauge','map');
+	}
+	
+	
 	function cargaLibreriaVisualizacion($listapaquetes){
 		/***********
 		 * Esta función hará un echo de algo parecido a:
@@ -113,7 +131,7 @@
 		
 		
 		 // Opciones del gráfico
-		$this->creaOpcionesGraficoJSON($opciones); 
+		$this->creaOpcionesGrafico($opciones); 
 		
 		// Crea y dibuja el gráfico, pasando algunas opciones.
 		
@@ -146,8 +164,9 @@
 	private function creaTablaDatosPieChart($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
 	
 	echo"        var datos = new google.visualization.DataTable();
-        datos.addColumn('".$columnas[0]["tipo"]."', '".$columnas[0]["nombre"]."');
-        datos.addColumn('".$columnas[1]["tipo"]."', '".$columnas[1]["nombre"]."');\n ";
+        datos.addColumn('string', '".$columnas["nombre0"]."');
+        datos.addColumn('number', '".$columnas["nombre1"]."');\n" 
+        ;
     
 	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
 	if ($mysqli->connect_errno) {
@@ -444,15 +463,17 @@ var data = google.visualization.arrayToDataTable([
 	 * 		para conectarse a la base de datos de la que extraeremos los datos
 	 * 
 	 * @param $columnas
-	 * 		Nombre de las columnas de la tabla de datos. Será un array bidimensional [numero][tipo] y [numero][nombre]
-	 * 		Tipo: string, number, boolean
+	 * 		Nombre de las columnas de la tabla de datos. Será un array asociativo con el siguiente aspecto:
+	 * 			$columnas['ncolumnas']=número >=1;
+	 * 			$columnas['$nombre0'], $columnas['$nombre1'], ... tantos como $columnas['ncolumnas']
+	 * 			$columnas['$tipo0'], $columnas['$tipo1'], ... tantos como $columnas['ncolumnas']
 	 */
 	private function creaTablaDatosTable($servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta){
 	
 	echo"        var datos = new google.visualization.DataTable();\n";
-     $n=count($columnas);
+     $n=$columnas['ncolumnas'];
      for($i=0;$i<$n;$i++) {
-    	echo"    datos.addColumn('".$columnas[$i]["tipo"]."', '".$columnas[$i]["nombre"]."');\n ";		
+    	echo"    datos.addColumn('".$columnas["tipo".$i]."', '".$columnas["nombre".$i]."');\n ";		
 	}
 
 	$mysqli = new mysqli($servidorBD,$usuarioBD,$passwBD,$bd);
@@ -468,7 +489,7 @@ var data = google.visualization.arrayToDataTable([
 			echo "[";
 			$i=0;
 			while ($i<$n){
-				switch ($columnas[$i]['tipo']){
+				switch ($columnas['tipo'.$i]){
 					case 'number':
 						echo $fila[$i];
 						break;
@@ -609,202 +630,79 @@ var data = google.visualization.arrayToDataTable([
 	 *         var opciones = {title: 'Pizza que me comí anoche',
         					   width: 400,	
         					   height: 300};
-	 * @param $opciones : Es un array que contendrá las distintas opciones
+	 * @param $opciones : Es un JSON contendrá las distintas opciones
 	 * 
 	 * Comunes: 
-	 * 			- $opciones['title']: Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
-	 * 			- $opciones['width']: Anchura
-	 * 			- $opciones['height']: Altura
-	 * 			- $opciones['colors']: ['#aaaaaa', '#fffaff'] Para especificar los colores de las series
-	 * 			- $opciones['hAxis']: array("title" => "Eje X")
-	 * 			- $opciones['vAxis']: array("title" => "Eje Y")
-	 * 			- $opciones['legend']: none, bottom, top, left, right
-	 * 			- $opciones['backgroundColor']: color de fondo, en hexadecimal
+	 * 			- 'title": Frase que aparece sobre el gráfico. Puede estar vacía o ser NULL
+	 * 			- 'width": Anchura
+	 * 			- 'height": Altura
+	 * 			- 'colors": ['#aaaaaa', '#fffaff'] Para especificar los colores de las series
+	 * 			- 'hAxis": array("title" => "Eje X")
+	 * 			- 'vAxis": array("title" => "Eje Y")
+	 * 			- 'legend": none, bottom, top, left, right
+	 * 			- 'backgroundColor": color de fondo, en hexadecimal
 	 * 	 
 	 * Para un PieChart:  		
-	 * 			- $opciones['is3D']: Si el gráfico es en 3D o no
-	 * 			- $opciones['pieHole']: Entre 0 y 1, recomendable entre 0.4 y 0.6
-	 *			- $opciones['pieStartAngle']: Dónde comienza el primer slice (Esto no es de interés)
+	 * 			- 'is3D": Si el gráfico es en 3D o no
+	 * 			- 'pieHole": Entre 0 y 1, recomendable entre 0.4 y 0.6
+	 *			- 'pieStartAngle": Dónde comienza el primer slice (Esto no es de interés)
 	 * 
 	 * Para un BarChart, ColumnChart y AreaChart:
-	 * 			- $opciones['isStack']: true, para poner barras apiladas 
+	 * 			- 'isStack": true, para poner barras apiladas 
 	 * 
 	 * Para un ScatterChart:
 	 * 			- Es recomendable poner hAxis y vAxis, así como poner legend a none
 	 *  
 	 * Para un LineChart: 
-	 * 			- $opciones['curveType']= 'function' para que las líneas sean curvas
-	 * 			- $opciones['lineWidth']: anchura de la línea. Por defecto es 2
-	 * 			- $opciones['orientation']= 'vertical' Para poner el gráfico de líneas de forma vertical
-	 * 			- $opciones['pointShape']:  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'  --> También para ScatterChart y AreaChart
-	 * 			- $opciones['pointShape']: 10, para expresar el tamaño del punto. Por defecto está a 0. --> También para ScatterChart y AreaChart
+	 * 			- 'curveType"= 'function' para que las líneas sean curvas
+	 * 			- 'lineWidth": anchura de la línea. Por defecto es 2
+	 * 			- 'orientation"= 'vertical' Para poner el gráfico de líneas de forma vertical
+	 * 			- 'pointShape":  'circle', 'triangle', 'square', 'diamond', 'star', or 'polygon'  --> También para ScatterChart y AreaChart
+	 * 			- 'pointShape": 10, para expresar el tamaño del punto. Por defecto está a 0. --> También para ScatterChart y AreaChart
 	 * 
 	 * Para un Histogram:
-	 * 			- $opciones['histogram']: ['lastBucketPercentile' => 5] Elimina el percentil 5 por arriba y por debajo
-	 * 			- $opciones['histogram']: ['bucketSize' => 1000] Cambia el tamaño del cubo a 1000
+	 * 			- 'histogram": ['lastBucketPercentile' => 5] Elimina el percentil 5 por arriba y por debajo
+	 * 			- 'histogram": ['bucketSize' => 1000] Cambia el tamaño del cubo a 1000
 	 * 
 	 * Para un Table:
-	 * 			- $opciones['page']: 'enable' 'disable'(por defecto) 'event' Para activar paginación
-	 * 			- $opciones['pageSize']: número de líneas por página
-	 * 			- $opciones['sort']: 'enable'(por defecto) 'disable' 'event' Para activar ordenación
+	 * 			- 'page": 'enable' 'disable'(por defecto) 'event' Para activar paginación
+	 * 			- 'pageSize": número de líneas por página
+	 * 			- 'sort": 'enable'(por defecto) 'disable' 'event' Para activar ordenación
 	 * 
 	 * Para un Gauge:
-	 * 			- $opciones['greenFrom']:
-	 *  	    - $opciones['greenTo']:
-	 * 	    	- $opciones['yellowFrom']:
-	 * 	    	- $opciones['yellowTo']:
-	 * 		    - $opciones['redFrom']:
-	 * 		    - $opciones['redTo']:		Las anteriores opciones indican en % dónde comienzan y acaban cada uno de los indicadores
+	 * 			- 'greenFrom":
+	 *  	    - 'greenTo":
+	 * 	    	- 'yellowFrom":
+	 * 	    	- 'yellowTo":
+	 * 		    - 'redFrom":
+	 * 		    - 'redTo":		Las anteriores opciones indican en % dónde comienzan y acaban cada uno de los indicadores
 	 * 										del marcador
-	 * 		    - $opciones['majorTicks']:	Número de líneas grandes
-	 * 		    - $opciones['minorTicks']:	Número de líneas pequeñas entre cada línea grande
-	 * 	   	 	- $opciones['animation']: {duration: ms, easing: 'linear' o 'in' o 'out' o 'inAndOut'}
+	 * 		    - 'majorTicks":	Número de líneas grandes
+	 * 		    - 'minorTicks":	Número de líneas pequeñas entre cada línea grande
+	 * 	   	 	- 'animation": {duration: ms, easing: 'linear' o 'in' o 'out' o 'inAndOut'}
 	 * 
 	 * Para un Map:
-	 * 			- $opciones['enableScrollWheel']: true (false es por defecto) para habilitar la rueda del ratón
-	 * 			- $opciones['showTip']: true para habilitar clic y que aparezca info (false es por defecto)
-	 * 			- $opciones['showLine']: true para que se dibuje una línea uniendo los puntos (false es por defecto) (NO ME FUNCIONA)
-	 * 			- $opciones['lineWidth']: $opciones['lineColor']:
-	 * 			- $opciones['mapType']: ‘normal’, ‘terrain’, ‘satellite’ o ‘hybrid’(por defecto)
-	 * 			- $opciones['useMapTypeControl']: Para poder seleccionar entre los anteriores
-	 *  	 	- $opciones['zoomLevel']: 0 - 19 (se ajusta solo)
-	 * 			- $opciones['icons']=['default'=>['normal'=>'http://direccionicono.png', 'selected'=>http://otradireccionicono.png']]
+	 * 			- 'enableScrollWheel": true (false es por defecto) para habilitar la rueda del ratón
+	 * 			- 'showTip": true para habilitar clic y que aparezca info (false es por defecto)
+	 * 			- 'showLine": true para que se dibuje una línea uniendo los puntos (false es por defecto) (NO ME FUNCIONA)
+	 * 			- 'lineWidth": 
+	 * 			- 'lineColor":
+	 * 			- 'mapType": ‘normal’, ‘terrain’, ‘satellite’ o ‘hybrid’(por defecto)
+	 * 			- 'useMapTypeControl": Para poder seleccionar entre los anteriores
+	 *  	 	- 'zoomLevel": 0 - 19 (se ajusta solo)
+	 * 			- 'icons"=['default'=>['normal'=>'http://direccionicono.png', 'selected'=>http://otradireccionicono.png']]
 	 * 
-	 *  	 	- $opciones['']:
-	 */
-	private function creaOpcionesGrafico($opciones){
-		$n = count($opciones);
-
-		$i=0;
-		echo "	var opciones = {";
-		foreach ($opciones as $opcion => $valor){
-			$comilla="";
-			if (is_string($valor)){
-				$comilla="'";
-			}
-			if (is_bool($valor)){				
-				if ($valor==TRUE)
-					$valor="true";
-				else 
-					$valor="false";
-				
-			}
-			if (is_array($valor)) {
-				if ($opcion=="colors"){
-					echo "\n			".$opcion.": [";
-					$n2=count($valor);
-					$j=0;
-					foreach($valor as $x => $y){
-
-						//else{
-						$comilla2="";
-						if (is_string($y))
-							$comilla2="'";
-						
-						if (is_bool($y)){				
-							if ($y==TRUE)
-								$y="true";
-							else 
-								$y="false";				
-						}
-						echo $comilla2.$y.$comilla2;
-						//}
-						
-						$j++;						
-						if ($j<$n2)
-							echo ",";	
-			
-					}
-					echo "]";
-				}
-				else{   // Ejemplo--> hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
-					echo "\n			".$opcion.": {";
-	
-					$n2=count($valor);
-					$j=0;
-					foreach($valor as $x => $y){
-						
-						
-						
-						if (is_array($y)){
-							echo "\n			".$x.": {";
-	
-							$n3=count($y);
-							$k=0;
-							foreach($y as $ynombre => $yvalor){
-								$comilla3="";
-								if (is_string($yvalor))
-									$comilla3="'";
-						
-								if (is_bool($yvalor)){				
-									if ($yvalor==TRUE)
-										$yvalor="true";
-									else 
-										$yvalor="false";				
-								}
-								echo $ynombre.": ".$comilla3.$yvalor.$comilla3;
-								$k++;
-								if ($k<$n3)
-									echo ",";	
-							}	
-					
-							echo "}";
-							
-						}
-						else{
-						
-						
-						
-						$comilla2="";
-						if (is_string($y))
-							$comilla2="'";
-						
-						if (is_bool($y)){				
-							if ($y==TRUE)
-								$y="true";
-							else 
-							$valor="false";				
-						}
-						echo $x.": ".$comilla2.$y.$comilla2;
-						
-						
-						}
-						
-						
-						$j++;
-						if ($j<$n2)
-							echo ",";	
-					}	
-					
-					echo "}";
-				}
-			}
-			else{
-				echo "\n			".$opcion.": ".$comilla.$valor.$comilla;
-			}
-			$i++;
-			if ($i<$n)
-				echo ",";	
-
-		}
-		echo "\n	};";    			
-	}
-	
-	
-	
-	/*********************************************************************************
-	 * Voy a intentar hacer una función que reciba un array ($opciones) y lo codifique en JSON
-	 * 
-	 * 
+	 * TENGO QUE COMPROBAR EL CORRECTO FUNCIONAMIENTO DE LOS ARRAYS EN JSON 	 	
 	 * */
-		private function creaOpcionesGraficoJSON($opciones){
+	 
+		private function creaOpcionesGrafico($opciones){
 
 		echo "	var opciones = ";
 	
-		echo json_encode ($opciones);
+		echo $opciones;
 	
-		echo ";";
-		}
+		echo ";\n";
+		}	 
 	
 	/*********************************************************************************
 	 * Esta función crea el gráfico con los datos y opciones anteriores.
