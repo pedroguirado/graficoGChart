@@ -21,29 +21,73 @@
 	
 	
 	/****************************************************************************+
-	 * Esta función va a recibir una matriz asociativa que es POST, sabiendo que tengo:
+	 * Esta función va a recibir una matriz asociativa que es $_POST, sabiendo que tengo:
 	 * 
 	 * 
-	 * $POST['numerograficos']= Un número que debe ser mayor que 0
- 	 * $POST['tipografico1'], $POST['tipografico2'], $POST['tipografico3'], $POST['tipografico4'], Tantos como 'numerograficos'
+	 * $_POST['numerograficos']= Un número que debe ser mayor que 0
+ 	 * $_POST['tipografico1'], $_POST['tipografico2'], $_POST['tipografico3'], $_POST['tipografico4'], Tantos como 'numerograficos'
 	 * 
 	 * generará un array que como mucho contendrá: 
 	 * 			array('corechart','table','gauge','map')
 	 * 
+	 *  valores que puede tomar $POST['tipograficoN'] : 
+	 * 		- del paquete 'corechart': PieChart, BarChart , ColumnChart, ScatterChart, LineChart, AreaChart, ClandestickChart, Histogram
+	 * 		- del paquete 'gauge': Gauge
+ 	 * 		- del paquete 'table': Table
+ 	 * 		- del paquete 'map': Map
+	 * 
 	 * */
-	function generaListaPaquetes ($p){
+	private function generaListaPaquetes($p){
+		$num = $p['numerograficos'];
+		$corechart=FALSE;
+		$gauge=FALSE;
+		$table=FALSE;
+		$map=FALSE;		
 		
-		return array('corechart','table','gauge','map');
+		for ($i=1; $i<=$num; $i++){
+			if (($p['tipografico'.$i]=='PieChart')||($p['tipografico'.$i]=='BarChart')||($p['tipografico'.$i]=='ColumnChart')
+			   ||($p['tipografico'.$i]=='')||($p['tipografico'.$i]=='ScatterChart')||($p['tipografico'.$i]=='LineChart')
+			   ||($p['tipografico'.$i]=='AreaChart')||($p['tipografico'.$i]=='ClandestickChart')||($p['tipografico'.$i]=='Histogram')){
+				$corechart=TRUE;
+			}elseif ($p['tipografico'.$i]=='Gauge'){
+				$gauge=TRUE;
+			}
+			elseif ($p['tipografico'.$i]=='Table'){
+				$table=TRUE;
+			}
+			elseif ($p['tipografico'.$i]=='Map'){
+				$map=TRUE;
+			}						
+		}
+		$paquetes=array();
+		$i=0;
+		if ($corechart){
+			$paquetes[$i]='corechart';
+			$i++;
+		}
+		if ($gauge){
+			$paquetes[$i]='gauge';
+			$i++;
+		}
+		if ($table){
+			$paquetes[$i]='table';
+			$i++;
+		}
+		if ($map){
+			$paquetes[$i]='map';
+			$i++;
+		}		
+		return $paquetes;
 	}
 	
 	
-	function cargaLibreriaVisualizacion($listapaquetes){
+	function cargaLibreriaVisualizacion($p){
 		/***********
 		 * Esta función hará un echo de algo parecido a:
 		 * 
 		 * google.load('visualization', '1.0', {'packages':['corechart']});
 		 * 
-		 * @param listapaquetes es un array de string con valores como corechart, table o gauge
+		 * @param p es en realidad $_POST
 		 * 
 		 * Dependiendo del tipo de gráfico que queramos visualizar, habrá que cargar distintos paquetes
 		 * 
@@ -52,6 +96,7 @@
 		 * <script type="text/javascript">
 		 * 
 		 */
+		 $listapaquetes=$this->generaListaPaquetes($p);
 		 
 		 echo "google.load('visualization', '1.0', {'packages':[";
 		 $n=count($listapaquetes);

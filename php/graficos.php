@@ -36,16 +36,63 @@
  * 
  */
 
+ function compruebaParametros(){
+ 	if (!isset($_POST['servidorbd']))
+		return FALSE;
+ 	if (!isset($_POST['passwbd']))
+		return FALSE;
+	if (!isset($_POST['usuariobd']))
+		return FALSE;
+	if (!isset($_POST['bd']))
+		return FALSE;
+	if (!isset($_POST['numerograficos']))
+		return FALSE;
+	if (!isset($_POST['tipografico1']))
+		return FALSE;
+	if (!isset($_POST['consulta1']))
+		return FALSE;		
+	
+	if (($_POST['tipografico1']=='PieChart')||($_POST['tipografico1']=='Table')){
+		if (!isset($_POST['columnas1']))
+			return FALSE;		
+	}
+	
+	$num=intval($_POST['numerograficos']);
+	if ($num<=0)
+		return FALSE;
+	
+	if ($num>=2){
+		for ($i=2;$i<=$num;$i++){
+			if (!isset($_POST['tipografico'.$i]))
+				return FALSE;
+			if (!isset($_POST['consulta'.$i]))
+				return FALSE;
+			if (($_POST['tipografico'.$i]=='PieChart')||($_POST['tipografico'.$i]=='Table')){
+				if (!isset($_POST['columnas'.$i]))
+					return FALSE;		
+			}
+		}
+	}	
+ 	return TRUE;
+ }
 
-include ("graficoGChart.class.php");
-$grafico = new graficoGChart();
+if (!compruebaParametros()){
+	header('Location: error.php');	
+	die();
+}
+else{	
 
+  include ("graficoGChart.class.php");
+  $grafico = new graficoGChart();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
   <head>
   	<title>Generando Google Charts</title>
 	<meta charset="utf-8">
+	
+	<link href="../css/grafico.css">
 	
         <!--Carga la API de AJAX -->	
     <?php
@@ -56,160 +103,40 @@ $grafico = new graficoGChart();
       // Carga el API de Visualizacion y el paquete del gráfico de quesitos
       <?php
       
-      $lista=$grafico->generaListaPaquetes($_POST);
-      $grafico->cargaLibreriaVisualizacion($lista);
+      
+      $grafico->cargaLibreriaVisualizacion($_POST);
       
       
-      $servidorBD= 'localhost';
-	  $usuarioBD='pruebas';
-	  $passwBD='probando';
-	  $bd='mispruebas';
-	  
-	  $tipografico=$_POST['tipografico1'];
-	  $columnas=$_POST['columnas1'];
-	  $columnas=json_decode($columnas,TRUE); // TRUE para que haga array asociativo
-
-	  $consulta=$_POST['consulta1'];
-	  $opciones=$_POST['opciones1'];
-	  $grafico->dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
+      $servidorBD= $_POST['servidorbd'];
+	  $usuarioBD=$_POST['usuariobd'];
+	  $passwBD=$_POST['passwbd'];
+	  $bd=$_POST['bd'];
 	  
 	  
-	  $tipografico=$_POST['tipografico2'];
-	  $columnas=$_POST['columnas2'];
-	  $columnas=json_decode($columnas,TRUE); // TRUE para que haga array asociativo
-
-	  $consulta=$_POST['consulta2'];
-	  $opciones=$_POST['opciones2'];
-	  $grafico->dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
-/*	  // Columnas sí debo pasarlo como un array
-	  $columnas=[
-	  ["nombre" => "Ingredientes",
-	  "tipo" => "string"],
-	  ["nombre" => "Trozos",
-	  "tipo" => "number"]
-	  ];
+	  $num= intval($_POST['numerograficos']);
+	  for ($g=1; $g<=$num; $g++){
+	  		$tipografico=$_POST['tipografico'.$g];
+			$consulta=$_POST['consulta'.$g];
+	  		$opciones=$_POST['opciones'.$g];	
+			if (($tipografico=='PieChart')||($tipografico=='Table')){
+				$columnas=$_POST['columnas'.$g];
+	  			$columnas=json_decode($columnas,TRUE); // TRUE para que haga array asociativo
+			}
+			else{
+				$columnas=NULL;
+			}
+			$grafico->dibujaGrafico($tipografico,$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
+	  }
 	  
-	  $consulta="SELECT sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas;";
-
-	  $opciones['title'] = "Pizza que me comí anoche";
-	  $opciones['is3D'] = true;
-	  $opciones['height'] = 300;
-	  $opciones['width']=700;
-	  $opciones['pieHole']=0.4;
-	  //$opciones['pieStartAngle']=100;
-	  $opciones['colors']= ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6'];
-      
-	  $grafico->dibujaGrafico('PieChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta, $opciones);
-	  
-	  $consulta2="SELECT ciudad, sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas group by ciudad;";
-	  $opciones['isStacked']=true;
-	  $grafico->dibujaGrafico('BarChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones); 
-	  $opciones['isStacked']=false;  
-	  $opciones['vAxis']=array("title" => "Year");
-	  $grafico->dibujaGrafico('ColumnChart',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas, $consulta2, $opciones);  
-	  
-	  $consulta3="SELECT pepperoni as Pepperoni, aceitunas as Aceitunas from pizzas;";
-	  $opciones2['title']="Comparo Pepperoni y Aceitunas";
-	  $opciones2['height'] = 300;
-	  $opciones2['width']= 500;	  
-	  $opciones2['legend']='none';
-	  $opciones2['vAxis']=['title'=>'Pepperoni'];
-	  $opciones2['hAxis']=['title'=>'Aceitunas'];
-	  $opciones2['pointShape']='triangle';
-	  $grafico->dibujaGrafico('ScatterChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta3, $opciones2); 
-	  
-	  $opciones['curveType']='function';
-	  $opciones['lineWidth']=5;
-	  //$opciones['backgroundColor']='#aa0000';
-	  $opciones['pointSize']=10;
-	  $grafico->dibujaGrafico('LineChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta2, $opciones);
-	  $grafico->dibujaGrafico('AreaChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta2, $opciones);	
-	  $opciones4['title']="Mi primer histograma";
-	  $opciones4['legend']="none";
-	  $opciones4['width']=400;
-	  $opciones4['height']=600;
-	  $opciones4['histogram']= ['bucketSize' => 7]; 
-	  $consulta4="select pizzeria, precio from pizzas;";
-	  $grafico->dibujaGrafico('Histogram',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta4, $opciones4); 
-	  $opciones5['title']="Mi primer candelabro";
-	  $consulta5="SELECT ciudad, min( precio ) , precio, precio +4, max( precio ) FROM pizzas group by ciudad";
-	  $grafico->dibujaGrafico('CandlestickChart',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta5, $opciones5);
-	  
-	  
-	  
-	  $columnas6=[
-	  ["nombre" => "Ciudad",
-	  "tipo" => "string"],
-	  ["nombre" => "Pizzería",
-	  "tipo" => "string"],
-	  ["nombre" => "Precio",
-	  "tipo" => "number"]
-	  ];
-	  
-	  $consulta6="SELECT ciudad, pizzeria, precio from pizzas;";
-
-	  $opciones6['title'] = "Pizza que me comí anoche";
-	  $opciones6['page'] ='enable';
-	  $opciones6['pageSize'] = 5;
-	  $opciones6['width']=500;
-      
-	  $grafico->dibujaGrafico('Table',$servidorBD,$usuarioBD,$passwBD,$bd, $columnas6, $consulta6, $opciones6);
-	  
-	  
-	  
-	  $opciones7['title']="Mi primer gauge";
-	  $opciones7['redTo']=40;
-	  $consulta7='select pizzeria, precio from pizzas where ciudad="Maracena" ;';
-	  $grafico->dibujaGrafico('Gauge',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta7, $opciones7);
-	  
-	  $opciones11['title']='Mi primer mapa';
-	  //$opciones11['width']=900;
-	  //$opciones11['height']=800;
-	  //$opciones11['zoomLevel']=10;
-	  $opciones11['showTip']=true; $opciones11['showLine']=true; $opciones11['lineColor']='#cccccc'; $opciones11['lineWidth']=15;
-	  $opciones11['icons']=['default' => ['normal' => 'http://icons.iconarchive.com/icons/icons-land/vista-map-markers/48/Map-Marker-Ball-Azure-icon.png']];
-	  
-	  $consulta11='select x, y, pizzeria from pizzas  where provincia="Granada" group by x, y;';
-	  $grafico->dibujaGrafico('Map',$servidorBD,$usuarioBD,$passwBD,$bd, NULL, $consulta11, $opciones11);*/ 
 	  ?>  
       
     </script>
   </head>
-    <body>
-    	<!-- DIV que contiene el gráfico -->
-    <div id="capagrafico1"></div>
-    ddd
-	<div style="background-color: grey" id="capagrafico2"></div>
-	<div id="capagrafico3"></div>
-	<div id="capagrafico4"></div>
-	<div id="capagrafico5"></div>
-	<div id="capagrafico6"></div>
-	<div id="capagrafico7"></div>
-	<div id="capagrafico8"></div>
-	<div id="capagrafico9"></div>
-	<div id="capagrafico10"></div>
-	<div style="width:500px" id="capagrafico11"></div>
-	<p>kkkkkkkkkkk</p>
-	<div>
+    <body>	
 		<?php
-		echo $_POST['numerograficos'];
 		for ($i=1;$i<=$_POST['numerograficos'];$i++){
-			echo $_POST['tipografico'.$i]."<br/>\n";
-			echo $_POST['consulta'.$i];
-			echo "<br/><br/>\n";
-			echo $_POST['opciones'.$i];
-			echo "<br/><br/>\n";
-			if (($_POST['tipografico'.$i]=="PieChart") || ($_POST['tipografico'.$i] == "Table")){
-				echo $_POST['columnas'.$i];
-			}
-			echo "<br/><br/><br/>\n";
-			
-			echo "\n\n";
-			echo "\n\n";
+			echo "<div class='divgrafico' id='capagrafico".$i."'></div>\n";
 		}
-		?>
-		
-		
-	</div>
+		?>	
     </body>    
 </html>

@@ -88,8 +88,8 @@
 "height": 300,
 "is3D": true}
 				</textarea> 
-				<textarea  rows="4" cols="80" name="consulta3">SELECT sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas;</textarea>
-				<textarea  rows="4" cols="80" name="columnas3">{["nombre" => "Ingredientes", "tipo" => "string"], ["nombre" => "Trozos", "tipo" => "number"]}</textarea>
+				<textarea  rows="4" cols="80" name="consulta3">SELECT ciudad, sum(piña) as Piña, sum(atun) as Atún, sum(pepperoni) as Pepperoni, sum(aceitunas) as Aceitunas, sum(cebolla) as Cebolla, sum(champiñones) as Champiñones from pizzas group by ciudad;</textarea>
+				<textarea  rows="4" cols="80" name="columnas3"></textarea>
 				
 			</div>	
 			
@@ -101,7 +101,7 @@
 				<select name="tipografico4">
 					<option value="PieChart">PieChart</option> 
 					<option value="BarChart">BarChart</option>
-					<option value="ColumnChart">ColumnChart</option>
+					<option value="ColumnChart" selected="true">ColumnChart</option>
 					<option value="ScatterChart">ScatterChart</option>
 					<option value="LineChart">LineChart</option>
 					<option value="AreaChart">AreaChart</option>
